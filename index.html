@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        .moadl-container { display: none; }
+        
+        /* 순번 */
+        tbody { counter-reset: rowNumber; }
+        tbody tr { counter-increment: rowNumber; }
+        .td-index::before { content: counter(rowNumber); }
+        tbody tr[style*="display: none"] { counter-increment: none; }
+
+        /* 모달 스타일 */
+        .modal-container {
+            display: none; width: 100%; height: 100%; 
+            background-color: rgba(0,0,0,0.5); z-index: 1000;
+            position: fixed; top: 0; left: 0;
+        }
+        .modal-content {
+            background-color: white; width: 300px; margin: 100px auto;
+            padding: 20px; text-align: center; border-radius: 8px;
+        }
+        #btnIns { margin: 20px; }
+        .container { padding: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        th { background-color: #eee; }
+
+        /* 페이지네이션 스타일 */
+        .pagination {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .pagination button {
+            background-color: white;
+            border: 1px solid #ddd;
+            color: black;
+            padding: 5px 10px;
+            margin: 0 2px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+        .pagination button.active {
+            background-color: #4CAF50;
+            color: white;
+            border: 1px solid #4CAF50;
+        }
+        .pagination button:hover:not(.active) {
+            background-color: #ddd;
+        }
+    </style>
+    <title>정보글</title>
+</head>
+<body>
+    <button id="btnIns" onclick="openModal()">정보 입력</button>
+    
+    <div class="moadl-container" id="modalContainer">
+        <div class="modal-content">
+            <h3>정보 입력</h3>
+            분류 <input type="text" id="inputCategory" placeholder="분류">
+            <datalist id="categoryListOptions"></datalist>
+            <br><br>
+            제목 <input type="text" id="inputTitle" placeholder="제목">
+            <br><br>
+            링크 <input type="text" id="inputLink" placeholder="주소">
+            <div class="btn-modal-res">
+                <button id="btnRes" onclick="addRes()">등록</button>
+                <button onclick="closeModal()">닫기</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>정보 목록</h1>
+        <div class="search-box">
+            <select name="category" id="category">
+                <option value="모두">모두</option>
+            </select>
+            <input type="text" id="searchText" placeholder="검색어를 입력하세요.">
+            <button id="btnSearch">검색</button>
+        </div>
+        <div class="main-table">
+            <table id="mainTable">
+                <thead>
+                    <tr>
+                        <th style="width: 10%;">순번</th>
+                        <th style="width: 20%;">분류</th>
+                        <th style="width: 50%;">제목</th>
+                        <th style="width: 20%;">등록일</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+        
+        <div id="pagination" class="pagination"></div>
+    </div>
+
+    <script>
+        function gid(id) { return document.getElementById(id); }
+        function tag(tagName) { return document.createElement(tagName); }
+
+        const API_URL = "https://script.google.com/macros/s/AKfycby1_2VZxHfxHrgltVD5gZ0yX2S2SAQuUpw4ELbgtkvF_GlasGdamQHPmR7QAeGMfv_R/exec";
+        // 페이지 로드 시 데이터 읽어오기
+        window.onload = function() {
+            fetch(API_URL)
+                .then(res => res.json())
+                .then(data => {
+                    data.forEach(item => {
+                        updateCategoryList(item.분류);
+                        addRow(item.분류, item.제목, item.등록일, item.링크);
+                    });
+                    searchData();
+                });
+        };
+
+        let categoryList = ["모두"];
+        let currentPage = 1;
+        const rowsPerPage = 10;
+        let matchedRows = [];
+
+        // 정보 입력
+        function addRes() {
+            let categoryText = gid("inputCategory").value.trim();
+            let titleText = gid("inputTitle").value.trim();
+            let linkText = gid("inputLink").value.trim();
+            let today = new Date().toISOString().slice(0, 10);
+
+            if (categoryText == "" || titleText == "" || linkText == "") {
+                alert("내용을 모두 입력해주세요."); return;
+            }
+
+            // 서버(시트)로 전송
+            const payload = {
+                category: categoryText,
+                title: titleText,
+                link: linkText,
+                date: today
+            };
+
+            fetch(API_URL, {
+                method: "POST",
+                body: JSON.stringify(payload)
+            }).then(res => {
+                alert("저장되었습니다.");
+                location.reload();
+            });
+        }
+
+        function updateCategoryList(categoryText) {
+            if (categoryList.indexOf(categoryText) === -1) {
+                categoryList.push(categoryText);
+                let searchSelect = gid("category");
+                let newOption = tag("option");
+                newOption.text = categoryText; newOption.value = categoryText;
+                searchSelect.add(newOption);
+            }
+        }
+
+        // 모달 열고 닫기
+        function openModal() { gid("modalContainer").style.display = "block"; }
+        function closeModal() { gid("modalContainer").style.display = "none"; }   
+
+        // 행 추가
+        function addRow(category, title, regDate, link) {
+            let tbody = gid("tableBody");
+            let tr = tag("tr");
+            tr.dataset.link = link;
+        
+            let tdIndex = tag("td"); tdIndex.className = "td-index";
+            let tdCategory = tag("td"); tdCategory.className = "td-category"; tdCategory.innerText = category;
+            
+            let tdTitle = tag("td"); tdTitle.className = "td-title"; tdTitle.innerText = title;
+            tdTitle.style.cursor = "pointer";
+            tdTitle.onclick = function() { if(tr.dataset.link) window.open(tr.dataset.link, "_blank"); };
+
+            let tdRegDate = tag("td"); tdRegDate.className = "td-reg-date"; tdRegDate.innerText = regDate;
+
+            tr.appendChild(tdIndex); 
+            tr.appendChild(tdCategory); 
+            tr.appendChild(tdTitle); 
+            tr.appendChild(tdRegDate);
+            tbody.prepend(tr);
+        }
+
+        // 검색 및 페이지네이션 로직
+        function searchData() {
+            let searchText = gid("searchText").value.toLowerCase();
+            let selectedCategory = gid("category").value;
+            
+            let tbody = gid("tableBody");
+            let allRows = tbody.getElementsByTagName("tr");
+
+            matchedRows = [];
+
+            for (let i = 0; i < allRows.length; i++) {
+                let row = allRows[i];
+                let titleCell = row.getElementsByClassName("td-title")[0];
+                let categoryCell = row.getElementsByClassName("td-category")[0];
+                
+                if (titleCell && categoryCell) {
+                    let titleText = titleCell.innerText.toLowerCase();
+                    let categoryText = categoryCell.innerText;
+
+                    let isTextMatch = (searchText === "" || titleText.indexOf(searchText) > -1);
+                    let isCategoryMatch = (selectedCategory === "모두" || categoryText === selectedCategory);
+
+                    if (isTextMatch && isCategoryMatch) {
+                        matchedRows.push(row);
+                    }
+                    row.style.display = "none";
+                }
+            }
+            currentPage = 1;
+            renderTable();
+            renderPagination();
+        }
+
+        // 테이블
+        function renderTable() {
+            let start = (currentPage - 1) * rowsPerPage;
+            let end = start + rowsPerPage;
+
+            for (let i = 0; i < matchedRows.length; i++) {
+                if (i >= start && i < end) {
+                    matchedRows[i].style.display = "";
+                } else {
+                    matchedRows[i].style.display = "none";
+                }
+            }
+        }
+
+        function renderPagination() {
+            let paginationDiv = gid("pagination");
+            paginationDiv.innerHTML = "";
+
+            let totalPages = Math.ceil(matchedRows.length / rowsPerPage);
+
+            if (totalPages === 0) return;
+
+            for (let i = 1; i <= totalPages; i++) {
+                let btn = tag("button");
+                btn.innerText = i;
+
+                if (i === currentPage) {
+                    btn.className = "active";
+                }
+
+                btn.onclick = function() {
+                    currentPage = i;
+                    renderTable();
+                    renderPagination();
+                };
+
+                paginationDiv.appendChild(btn);
+            }
+        }
+
+        gid("btnSearch").onclick = searchData;
+        gid("category").onchange = searchData;
+        gid("searchText").onkeyup = function(e) {
+            if (e.key === "Enter") searchData();
+        } 
+    </script>
+</body>
+</html>
