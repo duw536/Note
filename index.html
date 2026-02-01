@@ -12,7 +12,7 @@
             --header-bg: #444444;     
             --input-bg: #222222;       
             --accent-color: #6fb98f;  
-            --modal-overlay: rgba(60, 60, 60, 0.6);
+            --modal-overlay: rgba(0, 0, 0, 0.7);
         }
 
         body { 
@@ -21,7 +21,6 @@
             font-family: sans-serif;
         }
 
-        /* 모달 */
         .modal-container {
             display: none; 
             width: 100%; 
@@ -32,6 +31,7 @@
             top: 0; 
             left: 0;
         }
+
         .modal-content {
             background-color: var(--container-bg); 
             color: var(--text-color);
@@ -43,6 +43,10 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             border: 1px solid var(--border-color);
         }
+
+        tbody { counter-reset: rowNumber; }
+        tbody tr:not([style*="display: none"]) { counter-increment: rowNumber; }
+        .td-index::before { content: counter(rowNumber); }
 
         #btnIns { 
             margin: 20px; 
@@ -63,9 +67,9 @@
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
+        
         h1 { color: var(--text-color); }
 
-        /* 검색박스 및 입력창 */
         .search-box { margin-bottom: 20px; }
         input[type="text"], select {
             background-color: var(--input-bg);
@@ -75,17 +79,7 @@
             border-radius: 6px;
             outline: none;
         }
-        input:focus { border-color: var(--accent-color); }
-        #btnSearch {
-            padding: 8px 15px;
-            background-color: #555;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
 
-        /* 테이블 스타일 */
         table { 
             width: 100%; 
             border-collapse: collapse; 
@@ -95,21 +89,19 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
             border-radius: 8px;
             overflow: hidden;
-            border: 1px solid #4a4a4a; /* 테이블 바깥쪽 테두리만 남김 */
+            border: 1px solid #4a4a4a;
         }
 
         th { 
             background-color: #767676;
             color: #ffffff;
             padding: 12px;
-            /* [수정] 모든 방향의 테두리를 초기화한 후 하단 선만 지정 */
             border: none; 
             border-bottom: 3px solid #222222; 
             font-weight: bold;
         }
 
         td { 
-            /* td 사이에는 실선을 유지하되, 색상을 살짝 부드럽게 조정 */
             border: 1px solid #cccccc; 
             padding: 10px; 
             background-color: #efefef;
@@ -117,24 +109,16 @@
             text-align: center;
         }
 
-        /* 첫 번째 td와 마지막 td의 좌우 잔선 제거 */
         td:first-child { border-left: none; }
         td:last-child { border-right: none; }
 
-        /* 행 구분을 더 명확히 하기 위한 호버 효과 */
         tbody tr:hover td {
             background-color: #e5e5e5;
         }
 
-        tbody { counter-reset: rowNumber; }
-        tbody tr { counter-increment: rowNumber; }
-        .td-index::before { 
-            content: counter(rowNumber); 
-        }
-        .td-title { transition: color 0.2s; }
+        .td-title { transition: color 0.2s; cursor: pointer; }
         .td-title:hover { color: var(--accent-color); text-decoration: underline; }
 
-        /* 페이지네이션 스타일 */
         .pagination {
             margin-top: 25px;
             text-align: center;
@@ -153,24 +137,14 @@
             color: white;
             border: 1px solid var(--accent-color);
         }
-        .pagination button:hover:not(.active) {
-            background-color: #333;
-        }
 
-        .btn-modal-res button {
-            margin: 10px 5px 0;
-            padding: 8px 20px;
-            cursor: pointer;
-            border-radius: 4px;
-            border: none;
-        }
-        #btnRes { background-color: var(--accent-color); color: white; }
+        #btnRes { background-color: var(--accent-color); color: white; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; }
     </style>
     <title>정보글</title>
 </head>
 <body>
     <button id="btnIns" onclick="openModal()">정보 입력</button>
-    <div class="moadl-container" id="modalContainer">
+    <div class="modal-container" id="modalContainer">
         <div class="modal-content">
             <h3>정보 입력</h3>
             분류 <input type="text" id="inputCategory" placeholder="분류">
@@ -188,9 +162,7 @@
     <div class="container">
         <h1>정보 목록</h1>
         <div class="search-box">
-            <select name="category" id="category">
-                <!-- <option value="모두">모두</option> -->
-            </select>
+            <select name="category" id="category"></select>
             <input type="text" id="searchText" placeholder="검색어를 입력하세요.">
             <button id="btnSearch">검색</button>
         </div>
