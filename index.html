@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         :root {
-            --bg-color: rgb(24, 24, 24); 
-            --container-bg: #2d2d2d;  
+            --bg-color:#363636; 
+            --container-bg: #2b2c31;  
             --text-color: #efefef;   
             --border-color: #4a4a4a;   
             --header-bg: #444444;     
@@ -98,32 +98,40 @@
             width: 100%; 
             border-collapse: collapse; 
             margin-top: 15px; 
-            background-color: var(--table-bg);
-            color: var(--table-text);
+            background-color: #000000;
+            color: #222222;
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
             border-radius: 8px;
             overflow: hidden;
+            border: 1px solid #4a4a4a; /* 테이블 바깥쪽 테두리만 남김 */
         }
-        
+
         th { 
             background-color: #767676;
-            color: #333;
+            color: #ffffff;
             padding: 12px;
-            border: 1px solid var(--table-border);
+            /* [수정] 모든 방향의 테두리를 초기화한 후 하단 선만 지정 */
+            border: none; 
+            border-bottom: 3px solid #222222; 
+            font-weight: bold;
         }
 
         td { 
-            
-            border: 1px solid var(--table-border); 
+            /* [수정] td 사이에는 실선을 유지하되, 색상을 살짝 부드럽게 조정 */
+            border: 1px solid #cccccc; 
             padding: 10px; 
             background-color: #efefef;
             color: #222222;
+            text-align: center;
         }
 
-        /* 테이블 내 제목 호버 */
-        .td-title:hover { 
-            color: var(--accent-color); 
-            text-decoration: underline; 
+        /* 첫 번째 td와 마지막 td의 좌우 잔선 제거 (선택 사항) */
+        td:first-child { border-left: none; }
+        td:last-child { border-right: none; }
+
+        /* 행 구분을 더 명확히 하기 위한 호버 효과 */
+        tbody tr:hover td {
+            background-color: #e5e5e5;
         }
 
         .td-title { transition: color 0.2s; }
