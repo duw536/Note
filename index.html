@@ -21,14 +21,6 @@
             font-family: sans-serif;
         }
 
-        .moadl-container { display: none; }
-        
-        /* 순번 자동 카운트 */
-        tbody { counter-reset: rowNumber; }
-        tbody tr { counter-increment: rowNumber; }
-        .td-index::before { content: counter(rowNumber); }
-        tbody tr[style*="display: none"] { counter-increment: none; }
-
         /* 모달 */
         .modal-container {
             display: none; 
@@ -117,7 +109,7 @@
         }
 
         td { 
-            /* [수정] td 사이에는 실선을 유지하되, 색상을 살짝 부드럽게 조정 */
+            /* td 사이에는 실선을 유지하되, 색상을 살짝 부드럽게 조정 */
             border: 1px solid #cccccc; 
             padding: 10px; 
             background-color: #efefef;
@@ -125,7 +117,7 @@
             text-align: center;
         }
 
-        /* 첫 번째 td와 마지막 td의 좌우 잔선 제거 (선택 사항) */
+        /* 첫 번째 td와 마지막 td의 좌우 잔선 제거 */
         td:first-child { border-left: none; }
         td:last-child { border-right: none; }
 
@@ -134,6 +126,11 @@
             background-color: #e5e5e5;
         }
 
+        tbody { counter-reset: rowNumber; }
+        tbody tr { counter-increment: rowNumber; }
+        .td-index::before { 
+            content: counter(rowNumber); 
+        }
         .td-title { transition: color 0.2s; }
         .td-title:hover { color: var(--accent-color); text-decoration: underline; }
 
@@ -192,7 +189,7 @@
         <h1>정보 목록</h1>
         <div class="search-box">
             <select name="category" id="category">
-                <option value="모두">모두</option>
+                <!-- <option value="모두">모두</option> -->
             </select>
             <input type="text" id="searchText" placeholder="검색어를 입력하세요.">
             <button id="btnSearch">검색</button>
@@ -225,16 +222,15 @@
             categoryList = ["모두"];
 
             fetch(API_URL)
-                .then(res => res.json())
-                .then(data => {
-                    data.forEach(item => {
-                        updateCategoryList(item.분류);
-                        addRow(item.분류, item.제목, item.등록일, item.링크);
-                    });
-                    searchData();
-                    console.log("데이터가 동기화되었습니다: " + new Date().toLocaleTimeString());
+            .then(res => res.json())
+            .then(data => {
+                data.forEach((item) => {
+                    updateCategoryList(item.분류);
+                    addRow(item.분류, item.제목, item.등록일, item.링크);
                 });
-}
+                searchData();
+            });
+        }
 
         window.onload = function() {
             loadData();
@@ -305,7 +301,9 @@
             tr.dataset.link = link;
             tr.dataset.title = title;
         
-            let tdIndex = tag("td"); tdIndex.className = "td-index";
+            let tdIndex = tag("td"); 
+            tdIndex.className = "td-index";
+
             let tdCategory = tag("td"); 
             tdCategory.className = "td-category"; 
             tdCategory.innerText = category;
@@ -340,7 +338,7 @@
             tr.appendChild(tdCategory); 
             tr.appendChild(tdTitle); 
             tr.appendChild(tdRegDate);
-            tbody.prepend(tr);
+            tbody.appendChild(tr);
         }
 
         // 검색 및 페이지네이션 로직
