@@ -4,9 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
+        :root {
+            --bg-color: rgb(24, 24, 24);       /* 전체 바깥 배경 (진회색) */
+            --container-bg: #2d2d2d;   /* 컨텐츠 박스 및 테이블 배경 */
+            --text-color: #efefef;     /* 글자 색상 (거의 흰색) */
+            --border-color: #4a4a4a;   /* 테두리 색상 */
+            --header-bg: #444444;      /* 테이블 헤더 배경 */
+            --input-bg: #222222;       /* 입력창 내부 배경 */
+            --accent-color: #6fb98f;   /* 포인트 컬러 (편안한 민트그린 계열) */
+            --modal-overlay: rgba(60, 60, 60, 0.6);
+        }
+
+        body { 
+            background-color: var(--bg-color); 
+            color: var(--text-color); 
+            font-family: sans-serif;
+        }
+
         .moadl-container { display: none; }
         
-        /* 순번 */
+        /* 순번 자동 카운트 */
         tbody { counter-reset: rowNumber; }
         tbody tr { counter-increment: rowNumber; }
         .td-index::before { content: counter(rowNumber); }
@@ -14,48 +31,140 @@
 
         /* 모달 스타일 */
         .modal-container {
-            display: none; width: 100%; height: 100%; 
-            background-color: rgba(0,0,0,0.5); z-index: 1000;
-            position: fixed; top: 0; left: 0;
+            display: none; 
+            width: 100%; 
+            height: 100%; 
+            background-color: var(--modal-overlay); 
+            z-index: 1000;
+            position: fixed;
+            top: 0; 
+            left: 0;
         }
         .modal-content {
-            background-color: white; width: 300px; margin: 100px auto;
-            padding: 20px; text-align: center; border-radius: 8px;
+            background-color: var(--container-bg); 
+            color: var(--text-color);
+            width: 320px; 
+            margin: 100px auto;
+            padding: 25px; 
+            text-align: center; 
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid var(--border-color);
         }
-        #btnIns { margin: 20px; }
-        .container { padding: 20px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
-        th { background-color: #eee; }
+
+        #btnIns { 
+            margin: 20px; 
+            padding: 10px 20px;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .container { 
+            padding: 20px; 
+            max-width: 1000px; 
+            margin: 20px auto; 
+            background-color: var(--container-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        h1 { color: var(--text-color); }
+
+        /* 검색박스 및 입력창 스타일 */
+        .search-box { margin-bottom: 20px; }
+        input[type="text"], select {
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            border-radius: 6px;
+            outline: none;
+        }
+        input:focus { border-color: var(--accent-color); }
+        #btnSearch {
+            padding: 8px 15px;
+            background-color: #555;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        /* 테이블 스타일 */
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-top: 15px; 
+            background-color: var(--table-bg); /* 흰색 배경 */
+            color: var(--table-text);         /* 검정색 글자 */
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        th { 
+            background-color: #767676; /* 헤더는 연한 회색 */
+            color: #333;
+            padding: 12px;
+            border: 1px solid var(--table-border);
+        }
+
+        td { 
+            
+            border: 1px solid var(--table-border); 
+            padding: 10px; 
+            background-color: #efefef;
+            color: #222222;
+        }
+
+        /* 테이블 내 제목 호버 효과 */
+        .td-title:hover { 
+            color: var(--accent-color); 
+            text-decoration: underline; 
+        }
+
+        .td-title { transition: color 0.2s; }
+        .td-title:hover { color: var(--accent-color); text-decoration: underline; }
 
         /* 페이지네이션 스타일 */
         .pagination {
-            margin-top: 20px;
+            margin-top: 25px;
             text-align: center;
         }
         .pagination button {
-            background-color: white;
-            border: 1px solid #ddd;
-            color: black;
-            padding: 5px 10px;
-            margin: 0 2px;
+            background-color: var(--container-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 6px 12px;
+            margin: 0 3px;
             cursor: pointer;
-            border-radius: 3px;
+            border-radius: 4px;
         }
         .pagination button.active {
-            background-color: #4CAF50;
+            background-color: var(--accent-color);
             color: white;
-            border: 1px solid #4CAF50;
+            border: 1px solid var(--accent-color);
         }
         .pagination button:hover:not(.active) {
-            background-color: #ddd;
+            background-color: #333;
         }
+
+        .btn-modal-res button {
+            margin: 10px 5px 0;
+            padding: 8px 20px;
+            cursor: pointer;
+            border-radius: 4px;
+            border: none;
+        }
+        #btnRes { background-color: var(--accent-color); color: white; }
     </style>
     <title>정보글</title>
 </head>
 <body>
     <button id="btnIns" onclick="openModal()">정보 입력</button>
-    
     <div class="moadl-container" id="modalContainer">
         <div class="modal-content">
             <h3>정보 입력</h3>
@@ -71,7 +180,6 @@
             </div>
         </div>
     </div>
-
     <div class="container">
         <h1>정보 목록</h1>
         <div class="search-box">
@@ -94,7 +202,6 @@
                 <tbody id="tableBody"></tbody>
             </table>
         </div>
-        
         <div id="pagination" class="pagination"></div>
     </div>
 
@@ -104,7 +211,11 @@
 
         const API_URL = "https://script.google.com/macros/s/AKfycby1_2VZxHfxHrgltVD5gZ0yX2S2SAQuUpw4ELbgtkvF_GlasGdamQHPmR7QAeGMfv_R/exec";
         // 페이지 로드 시 데이터 읽어오기
-        window.onload = function() {
+        function loadData() {
+            gid("tableBody").innerHTML = "";
+            gid("category").innerHTML = '<option value="모두">모두</option>';
+            categoryList = ["모두"];
+
             fetch(API_URL)
                 .then(res => res.json())
                 .then(data => {
@@ -113,7 +224,13 @@
                         addRow(item.분류, item.제목, item.등록일, item.링크);
                     });
                     searchData();
+                    console.log("데이터가 동기화되었습니다: " + new Date().toLocaleTimeString());
                 });
+}
+
+        window.onload = function() {
+            loadData();
+            // setInterval(loadData, 60000);
         };
 
         let categoryList = ["모두"];
@@ -123,6 +240,7 @@
 
         // 정보 입력
         function addRes() {
+            let btnRes = gid("btnRes");
             let categoryText = gid("inputCategory").value.trim();
             let titleText = gid("inputTitle").value.trim();
             let linkText = gid("inputLink").value.trim();
@@ -131,6 +249,9 @@
             if (categoryText == "" || titleText == "" || linkText == "") {
                 alert("내용을 모두 입력해주세요."); return;
             }
+
+            btnRes.disabled = true;
+            btnRes.innerText = "등록 중";
 
             // 서버(시트)로 전송
             const payload = {
@@ -146,6 +267,11 @@
             }).then(res => {
                 alert("저장되었습니다.");
                 location.reload();
+            }).catch(err => {
+                console.error("에러 발생:", err);
+                alert("저장에 실패했습니다.");
+                btnRes.disabled = false;
+                btnRes.innerText = "등록";
             });
         }
 
@@ -154,7 +280,8 @@
                 categoryList.push(categoryText);
                 let searchSelect = gid("category");
                 let newOption = tag("option");
-                newOption.text = categoryText; newOption.value = categoryText;
+                newOption.text = categoryText; 
+                newOption.value = categoryText;
                 searchSelect.add(newOption);
             }
         }
@@ -168,15 +295,38 @@
             let tbody = gid("tableBody");
             let tr = tag("tr");
             tr.dataset.link = link;
+            tr.dataset.title = title;
         
             let tdIndex = tag("td"); tdIndex.className = "td-index";
-            let tdCategory = tag("td"); tdCategory.className = "td-category"; tdCategory.innerText = category;
+            let tdCategory = tag("td"); 
+            tdCategory.className = "td-category"; 
+            tdCategory.innerText = category;
+            tdCategory.style.cursor = "help";
+            tdCategory.title = "더블클릭하여 분류 수정";
+            tdCategory.ondblclick = function() {
+                let newCategory = prompt("새로운 분류명을 입력하세요:", tdCategory.innerText);
+                
+                if (newCategory && newCategory.trim() !== "" && newCategory !== tdCategory.innerText) {
+                    updateCategoryOnServer(tdCategory.innerText, title, newCategory.trim());
+                }
+            };
             
-            let tdTitle = tag("td"); tdTitle.className = "td-title"; tdTitle.innerText = title;
+            let tdTitle = tag("td"); 
+            tdTitle.className = "td-title"; 
+            tdTitle.innerText = title;
+            tdTitle.title = "클릭하여 해당 링크로 이동";
             tdTitle.style.cursor = "pointer";
             tdTitle.onclick = function() { if(tr.dataset.link) window.open(tr.dataset.link, "_blank"); };
 
-            let tdRegDate = tag("td"); tdRegDate.className = "td-reg-date"; tdRegDate.innerText = regDate;
+            let tdRegDate = tag("td"); 
+            tdRegDate.className = "td-reg-date"; 
+            let dateObj = new Date(regDate);
+            let formattedDate = dateObj.toLocaleDateString('ko-KR', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+            });
+            tdRegDate.innerText = formattedDate;
 
             tr.appendChild(tdIndex); 
             tr.appendChild(tdCategory); 
@@ -216,6 +366,26 @@
             currentPage = 1;
             renderTable();
             renderPagination();
+        }
+
+        // 서버에 카테고리 수정을 요청
+        function updateCategoryOnServer(oldCat, title, newCat) {
+            const payload = {
+                action: "updateCategory",
+                oldCategory: oldCat,
+                title: title,
+                newCategory: newCat
+            };
+
+            fetch(API_URL, {
+                method: "POST",
+                body: JSON.stringify(payload)
+            }).then(res => {
+                alert("분류가 수정되었습니다.");
+                location.reload();
+            }).catch(err => {
+                alert("수정 중 오류가 발생했습니다.");
+            });
         }
 
         // 테이블
@@ -266,3 +436,4 @@
     </script>
 </body>
 </html>
+
