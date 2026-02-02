@@ -19,8 +19,10 @@
             background-color: var(--bg-color); 
             color: var(--text-color); 
             font-family: sans-serif;
+            margin: 0;
         }
 
+        /* 모달 공통 스타일 */
         .modal-container {
             display: none; 
             width: 100%; 
@@ -44,9 +46,10 @@
             border: 1px solid var(--border-color);
         }
 
-        tbody { counter-reset: rowNumber; }
-        tbody tr:not([style*="display: none"]) { counter-increment: rowNumber; }
-        .td-index::before { content: counter(rowNumber); }
+        .modal-content input {
+            width: 80%;
+            margin-bottom: 10px;
+        }
 
         #btnIns { 
             margin: 20px; 
@@ -68,9 +71,6 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
         
-        h1 { color: var(--text-color); }
-
-        .search-box { margin-bottom: 20px; }
         input[type="text"], select {
             background-color: var(--input-bg);
             color: var(--text-color);
@@ -80,49 +80,34 @@
             outline: none;
         }
 
+        /* 테이블 스타일 */
         table { 
             width: 100%; 
             border-collapse: collapse; 
             margin-top: 15px; 
-            background-color: #000000;
-            color: #222222;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            background-color: #efefef;
             border-radius: 8px;
             overflow: hidden;
-            border: 1px solid #4a4a4a;
         }
 
         th { 
             background-color: #767676;
             color: #ffffff;
             padding: 12px;
-            border: none; 
-            border-bottom: 3px solid #222222; 
-            font-weight: bold;
         }
 
         td { 
             border: 1px solid #cccccc; 
             padding: 10px; 
-            background-color: #efefef;
             color: #222222;
             text-align: center;
         }
 
-        td:first-child { border-left: none; }
-        td:last-child { border-right: none; }
-
-        tbody tr:hover td {
-            background-color: #e5e5e5;
-        }
-
-        .td-title { transition: color 0.2s; cursor: pointer; }
+        .td-title { cursor: pointer; transition: color 0.2s; }
         .td-title:hover { color: var(--accent-color); text-decoration: underline; }
+        .td-category { cursor: help; }
 
-        .pagination {
-            margin-top: 25px;
-            text-align: center;
-        }
+        .pagination { margin-top: 25px; text-align: center; }
         .pagination button {
             background-color: var(--container-bg);
             border: 1px solid var(--border-color);
@@ -132,42 +117,51 @@
             cursor: pointer;
             border-radius: 4px;
         }
-        .pagination button.active {
-            background-color: var(--accent-color);
-            color: white;
-            border: 1px solid var(--accent-color);
-        }
-
-        #btnRes { background-color: var(--accent-color); color: white; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; }
+        .pagination button.active { background-color: var(--accent-color); color: white; }
     </style>
-    <title>정보글</title>
+    <title>정보글 관리</title>
 </head>
 <body>
     <button id="btnIns" onclick="openModal()">정보 입력</button>
+
     <div class="modal-container" id="modalContainer">
         <div class="modal-content">
-            <h3>정보 입력</h3>
-            분류 <input type="text" id="inputCategory" placeholder="분류">
-            <datalist id="categoryListOptions"></datalist>
-            <br><br>
-            제목 <input type="text" id="inputTitle" placeholder="제목">
-            <br><br>
+            <h3>새 정보 입력</h3>
+            분류 <input type="text" id="inputCategory" placeholder="분류"><br>
+            제목 <input type="text" id="inputTitle" placeholder="제목"><br>
             링크 <input type="text" id="inputLink" placeholder="주소">
-            <div class="btn-modal-res">
-                <button id="btnRes" onclick="addRes()">등록</button>
+            <div style="margin-top:20px;">
+                <button id="btnRes" onclick="addRes()" style="background-color: var(--accent-color); color:white; border:none; padding:8px 20px; border-radius:4px; cursor:pointer;">등록</button>
                 <button onclick="closeModal()">닫기</button>
             </div>
         </div>
     </div>
+
+    <div class="modal-container" id="editModalContainer">
+        <div class="modal-content">
+            <h3>정보 수정</h3>
+            <input type="hidden" id="editOldCategory">
+            <input type="hidden" id="editOldTitle">
+            
+            분류 <input type="text" id="editCategory"><br>
+            제목 <input type="text" id="editTitle"><br>
+            링크 <input type="text" id="editLink">
+            <div style="margin-top:20px;">
+                <button id="btnUpdate" onclick="submitUpdate()" style="background-color: var(--accent-color); color:white; border:none; padding:8px 20px; border-radius:4px; cursor:pointer;">수정 완료</button>
+                <button onclick="closeEditModal()">취소</button>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
         <h1>정보 목록</h1>
         <div class="search-box">
-            <select name="category" id="category"></select>
+            <select id="category"></select>
             <input type="text" id="searchText" placeholder="검색어를 입력하세요.">
-            <button id="btnSearch">검색</button>
+            <button id="btnSearch" onclick="searchData()">검색</button>
         </div>
         <div class="main-table">
-            <table id="mainTable">
+            <table>
                 <thead>
                     <tr>
                         <th style="width: 10%;">순번</th>
@@ -183,20 +177,26 @@
     </div>
 
     <script>
-        function gid(id) { return document.getElementById(id); }
-        function tag(tagName) { return document.createElement(tagName); }
-
+        const gid = (id) => document.getElementById(id);
+        const tag = (n) => document.createElement(n);
         const API_URL = "https://script.google.com/macros/s/AKfycby1_2VZxHfxHrgltVD5gZ0yX2S2SAQuUpw4ELbgtkvF_GlasGdamQHPmR7QAeGMfv_R/exec";
-        // 페이지 로드 시 데이터 읽어오기
+
+        let categoryList = ["모두"];
+        let currentPage = 1;
+        const rowsPerPage = 10;
+        let matchedRows = [];
+
+        // 데이터 로드
         function loadData() {
-            gid("tableBody").innerHTML = "";
+            gid("tableBody").innerHTML = "<tr><td colspan='4'>로딩 중...</td></tr>";
             gid("category").innerHTML = '<option value="모두">모두</option>';
             categoryList = ["모두"];
 
             fetch(API_URL)
             .then(res => res.json())
             .then(data => {
-                data.forEach((item) => {
+                gid("tableBody").innerHTML = "";
+                data.forEach(item => {
                     updateCategoryList(item.분류);
                     addRow(item.분류, item.제목, item.등록일, item.링크);
                 });
@@ -204,214 +204,119 @@
             });
         }
 
-        window.onload = function() {
-            loadData();
-            // setInterval(loadData, 60000);
-        };
-
-        let categoryList = ["모두"];
-        let currentPage = 1;
-        const rowsPerPage = 10;
-        let matchedRows = [];
-
-        // 정보 입력
-        function addRes() {
-            let btnRes = gid("btnRes");
-            let categoryText = gid("inputCategory").value.trim();
-            let titleText = gid("inputTitle").value.trim();
-            let linkText = gid("inputLink").value.trim();
-            let today = new Date().toISOString().slice(0, 10);
-
-            if (categoryText == "" || titleText == "" || linkText == "") {
-                alert("내용을 모두 입력해주세요."); return;
-            }
-
-            btnRes.disabled = true;
-            btnRes.innerText = "등록 중";
-
-            // 서버(시트)로 전송
-            const payload = {
-                category: categoryText,
-                title: titleText,
-                link: linkText,
-                date: today
-            };
-
-            fetch(API_URL, {
-                method: "POST",
-                body: JSON.stringify(payload)
-            }).then(res => {
-                alert("저장되었습니다.");
-                location.reload();
-            }).catch(err => {
-                console.error("에러 발생:", err);
-                alert("저장에 실패했습니다.");
-                btnRes.disabled = false;
-                btnRes.innerText = "등록";
-            });
-        }
-
-        function updateCategoryList(categoryText) {
-            if (categoryList.indexOf(categoryText) === -1) {
-                categoryList.push(categoryText);
-                let searchSelect = gid("category");
-                let newOption = tag("option");
-                newOption.text = categoryText; 
-                newOption.value = categoryText;
-                searchSelect.add(newOption);
+        function updateCategoryList(cat) {
+            if (!categoryList.includes(cat)) {
+                categoryList.push(cat);
+                let opt = tag("option");
+                opt.value = opt.text = cat;
+                gid("category").add(opt);
             }
         }
-
-        // 모달 열고 닫기
-        function openModal() { gid("modalContainer").style.display = "block"; }
-        function closeModal() { gid("modalContainer").style.display = "none"; }   
 
         // 행 추가
-        function addRow(category, title, regDate, link) {
-            let tbody = gid("tableBody");
+        function addRow(cat, title, date, link) {
             let tr = tag("tr");
             tr.dataset.link = link;
             tr.dataset.title = title;
-        
-            let tdIndex = tag("td"); 
-            tdIndex.className = "td-index";
+            tr.dataset.category = cat;
 
-            let tdCategory = tag("td"); 
-            tdCategory.className = "td-category"; 
-            tdCategory.innerText = category;
-            tdCategory.style.cursor = "help";
-            tdCategory.title = "더블클릭하여 분류 수정";
-            tdCategory.ondblclick = function() {
-                let newCategory = prompt("새로운 분류명을 입력하세요:", tdCategory.innerText);
-                
-                if (newCategory && newCategory.trim() !== "" && newCategory !== tdCategory.innerText) {
-                    updateCategoryOnServer(tdCategory.innerText, title, newCategory.trim());
-                }
-            };
-            
-            let tdTitle = tag("td"); 
-            tdTitle.className = "td-title"; 
-            tdTitle.innerText = title;
-            tdTitle.title = "클릭하여 해당 링크로 이동";
-            tdTitle.style.cursor = "pointer";
-            tdTitle.onclick = function() { if(tr.dataset.link) window.open(tr.dataset.link, "_blank"); };
+            tr.innerHTML = `
+                <td class="td-index"></td>
+                <td class="td-category" title="더블클릭하여 수정">${cat}</td>
+                <td class="td-title" title="클릭하여 이동">${title}</td>
+                <td>${new Date(date).toLocaleDateString('ko-KR')}</td>
+            `;
 
-            let tdRegDate = tag("td"); 
-            tdRegDate.className = "td-reg-date"; 
-            let dateObj = new Date(regDate);
-            let formattedDate = dateObj.toLocaleDateString('ko-KR', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit'
-            });
-            tdRegDate.innerText = formattedDate;
-
-            tr.appendChild(tdIndex); 
-            tr.appendChild(tdCategory); 
-            tr.appendChild(tdTitle); 
-            tr.appendChild(tdRegDate);
-            tbody.appendChild(tr);
+            tr.querySelector(".td-category").ondblclick = () => openEditModal(cat, title, link);
+            tr.querySelector(".td-title").onclick = () => { if(link) window.open(link, "_blank"); };
+            gid("tableBody").appendChild(tr);
         }
 
-        // 검색 및 페이지네이션 로직
+        // 모달 입력 수정
+        function openModal() { gid("modalContainer").style.display = "block"; }
+        function closeModal() { gid("modalContainer").style.display = "none"; }
+        function openEditModal(c, t, l) {
+            gid("editOldCategory").value = c;
+            gid("editOldTitle").value = t;
+            gid("editCategory").value = c;
+            gid("editTitle").value = t;
+            gid("editLink").value = l;
+            gid("editModalContainer").style.display = "block";
+        }
+        function closeEditModal() { gid("editModalContainer").style.display = "none"; }
+
+        // 신규 등록
+        function addRes() {
+            let cat = gid("inputCategory").value.trim();
+            let tit = gid("inputTitle").value.trim();
+            let lnk = gid("inputLink").value.trim();
+            if(!cat || !tit || !lnk) return alert("모든 내용을 입력하세요.");
+
+            gid("btnRes").disabled = true;
+            fetch(API_URL, {
+                method: "POST",
+                body: JSON.stringify({ category: cat, title: tit, link: lnk, date: new Date().toISOString().slice(0, 10) })
+            }).then(() => location.reload());
+        }
+
+        // 수정
+        function submitUpdate() {
+            let payload = {
+                action: "updateCategory",
+                oldCategory: gid("editOldCategory").value,
+                title: gid("editOldTitle").value,
+                newCategory: gid("editCategory").value.trim(),
+                newTitle: gid("editTitle").value.trim(),
+                newLink: gid("editLink").value.trim()
+            };
+            gid("btnUpdate").disabled = true;
+            fetch(API_URL, { method: "POST", body: JSON.stringify(payload) })
+            .then(() => location.reload())
+            .catch(() => { alert("오류 발생"); gid("btnUpdate").disabled = false; });
+        }
+
+        // 검색 및 페이징
         function searchData() {
-            let searchText = gid("searchText").value.toLowerCase();
-            let selectedCategory = gid("category").value;
-            
-            let tbody = gid("tableBody");
-            let allRows = tbody.getElementsByTagName("tr");
+            let sText = gid("searchText").value.toLowerCase();
+            let sCat = gid("category").value;
+            let rows = Array.from(gid("tableBody").querySelectorAll("tr"));
 
-            matchedRows = [];
-
-            for (let i = 0; i < allRows.length; i++) {
-                let row = allRows[i];
-                let titleCell = row.getElementsByClassName("td-title")[0];
-                let categoryCell = row.getElementsByClassName("td-category")[0];
-                
-                if (titleCell && categoryCell) {
-                    let titleText = titleCell.innerText.toLowerCase();
-                    let categoryText = categoryCell.innerText;
-
-                    let isTextMatch = (searchText === "" || titleText.indexOf(searchText) > -1);
-                    let isCategoryMatch = (selectedCategory === "모두" || categoryText === selectedCategory);
-
-                    if (isTextMatch && isCategoryMatch) {
-                        matchedRows.push(row);
-                    }
-                    row.style.display = "none";
-                }
-            }
+            matchedRows = rows.filter(r => {
+                let t = r.dataset.title.toLowerCase();
+                let c = r.dataset.category;
+                return (sText === "" || t.includes(sText)) && (sCat === "모두" || c === sCat);
+            });
+            rows.forEach(r => r.style.display = "none");
             currentPage = 1;
             renderTable();
+        }
+
+        function renderTable() {
+            let start = (currentPage - 1) * rowsPerPage;
+            matchedRows.forEach(r => r.style.display = "none");
+
+            let pageRows = matchedRows.slice(start, start + rowsPerPage);
+            pageRows.forEach((r, index) => {
+                r.style.display = "";
+                r.querySelector(".td-index").innerText = start + index + 1;
+            });
             renderPagination();
         }
 
-        // 서버에 카테고리 수정을 요청
-        function updateCategoryOnServer(oldCat, title, newCat) {
-            const payload = {
-                action: "updateCategory",
-                oldCategory: oldCat,
-                title: title,
-                newCategory: newCat
-            };
-
-            fetch(API_URL, {
-                method: "POST",
-                body: JSON.stringify(payload)
-            }).then(res => {
-                alert("분류가 수정되었습니다.");
-                location.reload();
-            }).catch(err => {
-                alert("수정 중 오류가 발생했습니다.");
-            });
-        }
-
-        // 테이블
-        function renderTable() {
-            let start = (currentPage - 1) * rowsPerPage;
-            let end = start + rowsPerPage;
-
-            for (let i = 0; i < matchedRows.length; i++) {
-                if (i >= start && i < end) {
-                    matchedRows[i].style.display = "";
-                } else {
-                    matchedRows[i].style.display = "none";
-                }
-            }
-        }
-
         function renderPagination() {
-            let paginationDiv = gid("pagination");
-            paginationDiv.innerHTML = "";
-
-            let totalPages = Math.ceil(matchedRows.length / rowsPerPage);
-
-            if (totalPages === 0) return;
-
-            for (let i = 1; i <= totalPages; i++) {
-                let btn = tag("button");
-                btn.innerText = i;
-
-                if (i === currentPage) {
-                    btn.className = "active";
-                }
-
-                btn.onclick = function() {
-                    currentPage = i;
-                    renderTable();
-                    renderPagination();
-                };
-
-                paginationDiv.appendChild(btn);
+            let nav = gid("pagination"); nav.innerHTML = "";
+            let total = Math.ceil(matchedRows.length / rowsPerPage);
+            for (let i = 1; i <= total; i++) {
+                let b = tag("button"); b.innerText = i;
+                if (i === currentPage) b.className = "active";
+                b.onclick = () => { currentPage = i; searchData(); };
+                nav.appendChild(b);
             }
         }
 
-        gid("btnSearch").onclick = searchData;
+        window.onload = loadData;
         gid("category").onchange = searchData;
-        gid("searchText").onkeyup = function(e) {
-            if (e.key === "Enter") searchData();
-        } 
+        gid("searchText").onkeypress = (e) => { if(e.key === "Enter") searchData(); };
     </script>
 </body>
 </html>
-
