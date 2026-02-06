@@ -22,6 +22,35 @@
             margin: 0;
         }
 
+        #btnIns { 
+            margin: 20px; 
+            padding: 10px 20px;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .container { 
+            padding: 20px; 
+            max-width: 1000px; 
+            margin: 20px auto; 
+            background-color: var(--container-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        input[type="text"], select {
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            border-radius: 6px;
+            outline: none;
+        }
+
         /* 모달 공통 스타일 */
         .modal-container {
             display: none; 
@@ -51,35 +80,6 @@
             margin-bottom: 10px;
         }
 
-        #btnIns { 
-            margin: 20px; 
-            padding: 10px 20px;
-            background-color: var(--accent-color);
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .container { 
-            padding: 20px; 
-            max-width: 1000px; 
-            margin: 20px auto; 
-            background-color: var(--container-bg);
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        }
-        
-        input[type="text"], select {
-            background-color: var(--input-bg);
-            color: var(--text-color);
-            border: 1px solid var(--border-color);
-            padding: 10px;
-            border-radius: 6px;
-            outline: none;
-        }
-
         /* 테이블 스타일 */
         table { 
             width: 100%; 
@@ -107,6 +107,7 @@
         .td-title:hover { color: var(--accent-color); text-decoration: underline; }
         .td-category { cursor: help; }
 
+        /* 페이지네이션 */
         .pagination { margin-top: 25px; text-align: center; }
         .pagination button {
             background-color: var(--container-bg);
@@ -177,16 +178,18 @@
     </div>
 
     <script>
-        const gid = (id) => document.getElementById(id);
-        const tag = (n) => document.createElement(n);
         const API_URL = "https://script.google.com/macros/s/AKfycby1_2VZxHfxHrgltVD5gZ0yX2S2SAQuUpw4ELbgtkvF_GlasGdamQHPmR7QAeGMfv_R/exec";
-
-        let categoryList = ["모두"];
+        let categoryList = [];
         let currentPage = 1;
         const rowsPerPage = 10;
+        let allRows = [];
         let matchedRows = [];
 
-        // 데이터 로드
+        // 도우미
+        const gid = (id) => document.getElementById(id);
+        const tag = (n) => document.createElement(n);
+
+        // 데이터
         function loadData() {
             gid("tableBody").innerHTML = "<tr><td colspan='4'>로딩 중...</td></tr>";
             gid("category").innerHTML = '<option value="모두">모두</option>';
@@ -200,41 +203,93 @@
                     updateCategoryList(item.분류);
                     addRow(item.분류, item.제목, item.등록일, item.링크);
                 });
+                allRows = Array.from(gid("tableBody").querySelectorAll("tr"));
                 searchData();
             });
         }
 
-        function updateCategoryList(cat) {
-            if (!categoryList.includes(cat)) {
-                categoryList.push(cat);
+        function updateCategoryList(category) {
+            if (!categoryList.includes(category)) {
+                categoryList.push(category);
                 let opt = tag("option");
-                opt.value = opt.text = cat;
+                opt.value = opt.text = category;
                 gid("category").add(opt);
             }
         }
 
-        // 행 추가
-        function addRow(cat, title, date, link) {
+        function addRow(category, title, date, link) {
             let tr = tag("tr");
             tr.dataset.link = link;
             tr.dataset.title = title;
-            tr.dataset.category = cat;
+            tr.dataset.category = category;
 
             tr.innerHTML = `
                 <td class="td-index"></td>
-                <td class="td-category" title="더블클릭하여 수정">${cat}</td>
+                <td class="td-category" title="더블클릭하여 수정">${category}</td>
                 <td class="td-title" title="클릭하여 이동">${title}</td>
                 <td>${new Date(date).toLocaleDateString('ko-KR')}</td>
             `;
 
-            tr.querySelector(".td-category").ondblclick = () => openEditModal(cat, title, link);
+            tr.querySelector(".td-category").ondblclick = () => openEditModal(category, title, link);
             tr.querySelector(".td-title").onclick = () => { if(link) window.open(link, "_blank"); };
             gid("tableBody").appendChild(tr);
         }
 
-        // 모달 입력 수정
+        // 필터링 (검색 버튼, 카테고리 변경 시 호출)
+        function searchData() {
+            let sText = gid("searchText").value.toLowerCase();
+            let sCat = gid("category").value;
+
+            matchedRows = allRows.filter(r => {
+                let t = r.dataset.title.toLowerCase();
+                let c = r.dataset.category;
+                return (sText === "" || t.includes(sText)) && (sCat === "모두" || c === sCat);
+            });
+
+            currentPage = 1;
+            renderTable();
+        }
+
+        // 현재 페이지의 행만 보여주기 (페이지 번호 클릭 시 호출)
+        function renderTable() {
+            allRows.forEach(r => r.style.display = "none");
+
+            let start = (currentPage - 1) * rowsPerPage;
+            let end = start + rowsPerPage;
+            
+            let pageRows = matchedRows.slice(start, end);
+            
+            pageRows.forEach((r, index) => {
+                r.style.display = "";
+                r.querySelector(".td-index").innerText = start + index + 1;
+            });
+
+            renderPagination();
+        }
+
+        function renderPagination() {
+            let nav = gid("pagination");
+            nav.innerHTML = "";
+            let totalPages = Math.ceil(matchedRows.length / rowsPerPage);
+
+            if (totalPages === 0) return;
+
+            for (let i = 1; i <= totalPages; i++) {
+                let b = tag("button");
+                b.innerText = i;
+                if (i === currentPage) b.className = "active";
+                b.onclick = () => { 
+                    currentPage = i; 
+                    renderTable();
+                };
+                nav.appendChild(b);
+            }
+        }
+
+        // 모달
         function openModal() { gid("modalContainer").style.display = "block"; }
         function closeModal() { gid("modalContainer").style.display = "none"; }
+
         function openEditModal(c, t, l) {
             gid("editOldCategory").value = c;
             gid("editOldTitle").value = t;
@@ -245,21 +300,18 @@
         }
         function closeEditModal() { gid("editModalContainer").style.display = "none"; }
 
-        // 신규 등록
         function addRes() {
-            let cat = gid("inputCategory").value.trim();
+            let category = gid("inputCategory").value.trim();
             let tit = gid("inputTitle").value.trim();
             let lnk = gid("inputLink").value.trim();
-            if(!cat || !tit || !lnk) return alert("모든 내용을 입력하세요.");
-
+            if(!category || !tit || !lnk) return alert("모든 내용을 입력하세요.");
             gid("btnRes").disabled = true;
             fetch(API_URL, {
                 method: "POST",
-                body: JSON.stringify({ category: cat, title: tit, link: lnk, date: new Date().toISOString().slice(0, 10) })
+                body: JSON.stringify({ category: category, title: tit, link: lnk, date: new Date().toISOString().slice(0, 10) })
             }).then(() => location.reload());
         }
 
-        // 수정
         function submitUpdate() {
             let payload = {
                 action: "updateCategory",
@@ -273,45 +325,6 @@
             fetch(API_URL, { method: "POST", body: JSON.stringify(payload) })
             .then(() => location.reload())
             .catch(() => { alert("오류 발생"); gid("btnUpdate").disabled = false; });
-        }
-
-        // 검색 및 페이징
-        function searchData() {
-            let sText = gid("searchText").value.toLowerCase();
-            let sCat = gid("category").value;
-            let rows = Array.from(gid("tableBody").querySelectorAll("tr"));
-
-            matchedRows = rows.filter(r => {
-                let t = r.dataset.title.toLowerCase();
-                let c = r.dataset.category;
-                return (sText === "" || t.includes(sText)) && (sCat === "모두" || c === sCat);
-            });
-            rows.forEach(r => r.style.display = "none");
-            currentPage = 1;
-            renderTable();
-        }
-
-        function renderTable() {
-            let start = (currentPage - 1) * rowsPerPage;
-            matchedRows.forEach(r => r.style.display = "none");
-
-            let pageRows = matchedRows.slice(start, start + rowsPerPage);
-            pageRows.forEach((r, index) => {
-                r.style.display = "";
-                r.querySelector(".td-index").innerText = start + index + 1;
-            });
-            renderPagination();
-        }
-
-        function renderPagination() {
-            let nav = gid("pagination"); nav.innerHTML = "";
-            let total = Math.ceil(matchedRows.length / rowsPerPage);
-            for (let i = 1; i <= total; i++) {
-                let b = tag("button"); b.innerText = i;
-                if (i === currentPage) b.className = "active";
-                b.onclick = () => { currentPage = i; searchData(); };
-                nav.appendChild(b);
-            }
         }
 
         window.onload = loadData;
