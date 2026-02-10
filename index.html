@@ -17,7 +17,7 @@
             링크 <input type="text" id="inputLink" placeholder="주소">
             <div style="margin-top:20px;">
                 <button id="btnRes" onclick="addRes()" style="background-color: var(--accent-color); color:white; border:none; padding:8px 20px; border-radius:4px; cursor:pointer;">등록</button>
-                <button onclick="closeInsertModal()">닫기</button>
+                <button onclick="closeModal(dom.insertModalContainer)">닫기</button>
             </div>
         </div>
     </div>
@@ -33,7 +33,7 @@
             링크 <input type="text" id="editLink">
             <div style="margin-top:20px;">
                 <button id="btnUpdate" onclick="submitUpdate()" style="background-color: var(--accent-color); color:white; border:none; padding:8px 20px; border-radius:4px; cursor:pointer;">수정 완료</button>
-                <button onclick="closeEditModal()">취소</button>
+                <button onclick="closeModal(dom.editModalContainer)">취소</button>
             </div>
         </div>
     </div>
@@ -61,6 +61,7 @@
         <div id="pagination" class="pagination"></div>
     </div>
 
+    <!-- 카테고리 프리셋 -->
     <datalist id="categoryPresets"></datalist>
 
     <script>
@@ -75,7 +76,7 @@
         const gid = (id) => document.getElementById(id);
         const tag = (n) => document.createElement(n);
 
-        // 돔 
+        // 주요 돔 관리
         const dom = {
             tableBody: gid("tableBody"),
             category: gid("category"),
@@ -211,9 +212,6 @@
         function openInsertModal() {
             openModal(dom.insertModalContainer);
         }
-        function closeInsertModal() {
-            closeModal(dom.insertModalContainer);
-        }
 
         // 정보 수정 모달 제어
         function openEditModal(c, t, l) {
@@ -223,9 +221,6 @@
             dom.editTitle.value = t;
             dom.editLink.value = l;
             openModal(dom.editModalContainer);
-        }
-        function closeEditModal() {
-            closeModal(dom.editModalContainer);
         }
 
         // 새 정보 등록 
