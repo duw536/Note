@@ -3,129 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        :root {
-            --bg-color:#363636; 
-            --container-bg: #2b2c31;  
-            --text-color: #efefef;   
-            --border-color: #4a4a4a;   
-            --header-bg: #444444;     
-            --input-bg: #222222;       
-            --accent-color: #6fb98f;  
-            --modal-overlay: rgba(0, 0, 0, 0.7);
-        }
-
-        body { 
-            background-color: var(--bg-color); 
-            color: var(--text-color); 
-            font-family: sans-serif;
-            margin: 0;
-        }
-
-        #btnIns { 
-            margin: 20px; 
-            padding: 10px 20px;
-            background-color: var(--accent-color);
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .container { 
-            padding: 20px; 
-            max-width: 1000px; 
-            margin: 20px auto; 
-            background-color: var(--container-bg);
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        }
-
-        input[type="text"], select {
-            background-color: var(--input-bg);
-            color: var(--text-color);
-            border: 1px solid var(--border-color);
-            padding: 10px;
-            border-radius: 6px;
-            outline: none;
-        }
-
-        /* 모달 공통 스타일 */
-        .modal-container {
-            display: none; 
-            width: 100%; 
-            height: 100%; 
-            background-color: var(--modal-overlay); 
-            z-index: 1000;
-            position: fixed;
-            top: 0; 
-            left: 0;
-        }
-
-        .modal-content {
-            background-color: var(--container-bg); 
-            color: var(--text-color);
-            width: 320px; 
-            margin: 100px auto;
-            padding: 25px; 
-            text-align: center; 
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            border: 1px solid var(--border-color);
-        }
-
-        .modal-content input {
-            width: 80%;
-            margin-bottom: 10px;
-        }
-
-        /* 테이블 스타일 */
-        table { 
-            width: 100%; 
-            border-collapse: collapse; 
-            margin-top: 15px; 
-            background-color: #efefef;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        th { 
-            background-color: #767676;
-            color: #ffffff;
-            padding: 12px;
-        }
-
-        td { 
-            border: 1px solid #cccccc; 
-            padding: 10px; 
-            color: #222222;
-            text-align: center;
-        }
-
-        .td-title { cursor: pointer; transition: color 0.2s; }
-        .td-title:hover { color: var(--accent-color); text-decoration: underline; }
-        .td-category { cursor: help; }
-
-        /* 페이지네이션 */
-        .pagination { margin-top: 25px; text-align: center; }
-        .pagination button {
-            background-color: var(--container-bg);
-            border: 1px solid var(--border-color);
-            color: var(--text-color);
-            padding: 6px 12px;
-            margin: 0 3px;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-        .pagination button.active { background-color: var(--accent-color); color: white; }
-    </style>
+    <link rel="stylesheet" href="style.css">
     <title>정보글 관리</title>
 </head>
 <body>
-    <button id="btnIns" onclick="openModal()">정보 입력</button>
+    <button id="btnIns" onclick="openInsertModal()">정보 입력</button>
 
-    <div class="modal-container" id="modalContainer">
+    <div class="modal-container" id="insertModalContainer">
         <div class="modal-content">
             <h3>새 정보 입력</h3>
             분류 <input type="text" id="inputCategory" placeholder="분류"><br>
@@ -133,7 +17,7 @@
             링크 <input type="text" id="inputLink" placeholder="주소">
             <div style="margin-top:20px;">
                 <button id="btnRes" onclick="addRes()" style="background-color: var(--accent-color); color:white; border:none; padding:8px 20px; border-radius:4px; cursor:pointer;">등록</button>
-                <button onclick="closeModal()">닫기</button>
+                <button onclick="closeInsertModal()">닫기</button>
             </div>
         </div>
     </div>
@@ -189,34 +73,55 @@
         const gid = (id) => document.getElementById(id);
         const tag = (n) => document.createElement(n);
 
-        // 데이터
+        // 돔 
+        const dom = {
+            tableBody: gid("tableBody"),
+            category: gid("category"),
+            searchText: gid("searchText"),
+            pagination: gid("pagination"),
+
+            btnRes: gid("btnRes"),
+            insertModalContainer: gid("insertModalContainer"),
+
+            btnUpdate: gid("btnUpdate"),
+            editModalContainer: gid("editModalContainer"),
+            editOldCategory: gid("editOldCategory"),
+            editOldTitle: gid("editOldTitle"),
+            editCategory: gid("editCategory"),
+            editTitle: gid("editTitle"),
+            editLink: gid("editLink")
+        }
+
+        // 데이터 불러오기
         function loadData() {
-            gid("tableBody").innerHTML = "<tr><td colspan='4'>로딩 중...</td></tr>";
-            gid("category").innerHTML = '<option value="모두">모두</option>';
+            dom.tableBody.innerHTML = "<tr><td colspan='4'>로딩 중...</td></tr>";
+            dom.category.innerHTML = '<option value="모두">모두</option>';
             categoryList = ["모두"];
 
             fetch(API_URL)
             .then(res => res.json())
             .then(data => {
-                gid("tableBody").innerHTML = "";
+                dom.tableBody.innerHTML = "";
                 data.forEach(item => {
                     updateCategoryList(item.분류);
                     addRow(item.분류, item.제목, item.등록일, item.링크);
                 });
-                allRows = Array.from(gid("tableBody").querySelectorAll("tr"));
+                allRows = Array.from(dom.tableBody.querySelectorAll("tr"));
                 searchData();
             });
         }
 
+        // 카테고리 목록 업데이트
         function updateCategoryList(category) {
             if (!categoryList.includes(category)) {
                 categoryList.push(category);
                 let opt = tag("option");
                 opt.value = opt.text = category;
-                gid("category").add(opt);
+                dom.category.add(opt);
             }
         }
 
+        // 행 추가하기
         function addRow(category, title, date, link) {
             let tr = tag("tr");
             tr.dataset.link = link;
@@ -232,13 +137,13 @@
 
             tr.querySelector(".td-category").ondblclick = () => openEditModal(category, title, link);
             tr.querySelector(".td-title").onclick = () => { if(link) window.open(link, "_blank"); };
-            gid("tableBody").appendChild(tr);
+            dom.tableBody.appendChild(tr);
         }
 
         // 필터링 (검색 버튼, 카테고리 변경 시 호출)
         function searchData() {
-            let sText = gid("searchText").value.toLowerCase();
-            let sCat = gid("category").value;
+            let sText = dom.searchText.value.toLowerCase();
+            let sCat = dom.category.value;
 
             matchedRows = allRows.filter(r => {
                 let t = r.dataset.title.toLowerCase();
@@ -267,8 +172,9 @@
             renderPagination();
         }
 
+        // 페이지네이션 
         function renderPagination() {
-            let nav = gid("pagination");
+            let nav = dom.pagination;
             nav.innerHTML = "";
             let totalPages = Math.ceil(matchedRows.length / rowsPerPage);
 
@@ -286,50 +192,73 @@
             }
         }
 
-        // 모달
-        function openModal() { gid("modalContainer").style.display = "block"; }
-        function closeModal() { gid("modalContainer").style.display = "none"; }
-
-        function openEditModal(c, t, l) {
-            gid("editOldCategory").value = c;
-            gid("editOldTitle").value = t;
-            gid("editCategory").value = c;
-            gid("editTitle").value = t;
-            gid("editLink").value = l;
-            gid("editModalContainer").style.display = "block";
+        // 모달 열고 닫기
+        function openModal(modalId) {
+            modalId.style.display = "block";
         }
-        function closeEditModal() { gid("editModalContainer").style.display = "none"; }
+        function closeModal(modalId) {
+            modalId.style.display = "none";
+        }
 
+        // 정보 입력 모달 제어 
+        function openInsertModal() {
+            openModal(dom.insertModalContainer);
+        }
+        function closeInsertModal() {
+            closeModal(dom.insertModalContainer);
+        }
+
+        // 수정 모달 제어
+        function openEditModal(c, t, l) {
+           dom.editOldCategory.value = c;
+            dom.editOldTitle.value = t;
+            dom.editCategory.value = c;
+            dom.editTitle.value = t;
+            dom.editLink.value = l;
+            openModal(dom.editModalContainer);
+        }
+        function closeEditModal() {
+            closeModal(dom.editModalContainer);
+        }
+
+        // 새 정보 등록 
         function addRes() {
             let category = gid("inputCategory").value.trim();
             let tit = gid("inputTitle").value.trim();
             let lnk = gid("inputLink").value.trim();
             if(!category || !tit || !lnk) return alert("모든 내용을 입력하세요.");
-            gid("btnRes").disabled = true;
+            dom.btnRes.disabled = true;
             fetch(API_URL, {
                 method: "POST",
                 body: JSON.stringify({ category: category, title: tit, link: lnk, date: new Date().toISOString().slice(0, 10) })
             }).then(() => location.reload());
         }
 
+        // 데이터 업데이트 
         function submitUpdate() {
             let payload = {
                 action: "updateCategory",
-                oldCategory: gid("editOldCategory").value,
-                title: gid("editOldTitle").value,
-                newCategory: gid("editCategory").value.trim(),
-                newTitle: gid("editTitle").value.trim(),
-                newLink: gid("editLink").value.trim()
+                oldCategory: dom.editOldCategory.value,
+                title: dom.editOldTitle.value,
+                newCategory: dom.editCategory.value.trim(),
+                newTitle: dom.editTitle.value.trim(),
+                newLink: dom.editLink.value.trim()
             };
-            gid("btnUpdate").disabled = true;
+            dom.btnUpdate.disabled = true;
             fetch(API_URL, { method: "POST", body: JSON.stringify(payload) })
             .then(() => location.reload())
-            .catch(() => { alert("오류 발생"); gid("btnUpdate").disabled = false; });
+            .catch(() => { alert("오류 발생"); dom.btnUpdate.disabled = false; });
         }
 
         window.onload = loadData;
-        gid("category").onchange = searchData;
-        gid("searchText").onkeypress = (e) => { if(e.key === "Enter") searchData(); };
+        window.onclick = (event) => {
+            if (event.target.classList.contains('modal-container')) {
+                closeModal(event.target);
+            }
+        }
+        dom.category.onchange = searchData;
+        dom.searchText.onkeypress = (e) => { if(e.key === "Enter") searchData(); };
+
     </script>
 </body>
 </html>
