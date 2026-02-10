@@ -12,7 +12,7 @@
     <div class="modal-container" id="insertModalContainer">
         <div class="modal-content">
             <h3>새 정보 입력</h3>
-            분류 <input type="text" id="inputCategory" placeholder="분류"><br>
+            분류 <input type="text" id="inputCategory" list="categoryPresets" placeholder="분류"><br>
             제목 <input type="text" id="inputTitle" placeholder="제목"><br>
             링크 <input type="text" id="inputLink" placeholder="주소">
             <div style="margin-top:20px;">
@@ -28,7 +28,7 @@
             <input type="hidden" id="editOldCategory">
             <input type="hidden" id="editOldTitle">
             
-            분류 <input type="text" id="editCategory"><br>
+            분류 <input type="text" id="editCategory" list="categoryPresets"><br>
             제목 <input type="text" id="editTitle"><br>
             링크 <input type="text" id="editLink">
             <div style="margin-top:20px;">
@@ -60,6 +60,8 @@
         </div>
         <div id="pagination" class="pagination"></div>
     </div>
+
+    <datalist id="categoryPresets"></datalist>
 
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycby1_2VZxHfxHrgltVD5gZ0yX2S2SAQuUpw4ELbgtkvF_GlasGdamQHPmR7QAeGMfv_R/exec";
@@ -115,9 +117,14 @@
         function updateCategoryList(category) {
             if (!categoryList.includes(category)) {
                 categoryList.push(category);
+
                 let opt = tag("option");
                 opt.value = opt.text = category;
                 dom.category.add(opt);
+
+                let dataOpt = tag("option");
+                dataOpt.value = category;
+                gid("categoryPresets").appendChild(dataOpt);
             }
         }
 
@@ -208,7 +215,7 @@
             closeModal(dom.insertModalContainer);
         }
 
-        // 수정 모달 제어
+        // 정보 수정 모달 제어
         function openEditModal(c, t, l) {
            dom.editOldCategory.value = c;
             dom.editOldTitle.value = t;
