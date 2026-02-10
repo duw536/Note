@@ -16,7 +16,7 @@
             제목 <input type="text" id="inputTitle" placeholder="제목"><br>
             링크 <input type="text" id="inputLink" placeholder="주소">
             <div style="margin-top:20px;">
-                <button id="btnRes" onclick="addRes()" style="background-color: var(--accent-color); color:white; border:none; padding:8px 20px; border-radius:4px; cursor:pointer;">등록</button>
+                <button id="btnRes" onclick="addRes()">등록</button>
                 <button onclick="closeModal(dom.insertModalContainer)">닫기</button>
             </div>
         </div>
@@ -32,7 +32,7 @@
             제목 <input type="text" id="editTitle"><br>
             링크 <input type="text" id="editLink">
             <div style="margin-top:20px;">
-                <button id="btnUpdate" onclick="submitUpdate()" style="background-color: var(--accent-color); color:white; border:none; padding:8px 20px; border-radius:4px; cursor:pointer;">수정 완료</button>
+                <button id="btnUpdate" onclick="submitUpdate()">수정 완료</button>
                 <button onclick="closeModal(dom.editModalContainer)">취소</button>
             </div>
         </div>
@@ -180,7 +180,7 @@
             renderPagination();
         }
 
-        // 페이지네이션 
+        // 페이지네이션 (테이블 그릴 시 호출)
         function renderPagination() {
             let nav = dom.pagination;
             nav.innerHTML = "";

@@ -75,6 +75,14 @@ select {
   margin-bottom: 10px;
 }
 
+#btnRes, #btnUpdate {
+  background-color: var(--accent-color); 
+  color:white; border:none; 
+  padding:8px 20px; 
+  border-radius:4px; 
+  cursor:pointer;
+}
+
 /* 테이블 스타일 */
 table {
   width: 100%;
