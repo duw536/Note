@@ -214,12 +214,12 @@
         }
 
         // 정보 수정 모달 제어
-        function openEditModal(c, t, l) {
-           dom.editOldCategory.value = c;
-            dom.editOldTitle.value = t;
-            dom.editCategory.value = c;
-            dom.editTitle.value = t;
-            dom.editLink.value = l;
+        function openEditModal(category, title, link) {
+            dom.editOldCategory.value = category;
+            dom.editOldTitle.value = title;
+            dom.editCategory.value = category;
+            dom.editTitle.value = title;
+            dom.editLink.value = link;
             openModal(dom.editModalContainer);
         }
 
