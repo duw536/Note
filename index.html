@@ -8,6 +8,7 @@
 </head>
 <body>
     <button id="btnIns" onclick="openInsertModal()">정보 입력</button>
+    <button id="btnTme" onclick="openThemeModal()">테마 수정</button>
 
     <div class="modal-container" id="insertModalContainer">
         <div class="modal-content">
@@ -17,7 +18,7 @@
             링크 <input type="text" id="inputLink" placeholder="주소">
             <div style="margin-top:20px;">
                 <button id="btnRes" onclick="addRes()">등록</button>
-                <button onclick="closeModal(dom.insertModalContainer)">닫기</button>
+                <button id="btnClose" onclick="closeModal(dom.insertModalContainer)">닫기</button>
             </div>
         </div>
     </div>
@@ -33,7 +34,31 @@
             링크 <input type="text" id="editLink">
             <div style="margin-top:20px;">
                 <button id="btnUpdate" onclick="submitUpdate()">수정 완료</button>
-                <button onclick="closeModal(dom.editModalContainer)">취소</button>
+                <button id="btnClose" onclick="closeModal(dom.editModalContainer)">취소</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-container" id="themeModalContainer">
+        <div class="modal-content">
+            <h3>테마 수정</h3>
+            배경색1 <input type="color" class="editTheme" id="--bg-color"><br>
+            배경색2 <input type="color" class="editTheme" id="--container-bg"><br>
+            검색창 <input type="color" class="editTheme" id="--input-bg"><br>
+            글자색 <input type="color" class="editTheme" id="--text-color"><br>
+            버튼1 <input type="color" class="editTheme" id="--accent-color"><br>
+            글자색 <input type="color" class="editTheme" id="--accent-text-color"><br>
+            버튼2 <input type="color" class="editTheme" id="--agree-color"><br>
+            글자색 <input type="color" class="editTheme" id="--agree-text-color"><br>
+            버튼3 <input type="color" class="editTheme" id="--disagree-color"><br>
+            글자색 <input type="color" class="editTheme" id="--disagree-text-color"><br>
+            버튼4 <input type="color" class="editTheme" id="--reset-color"><br>
+            글자색 <input type="color" class="editTheme" id="--reset-text-color"><br>
+            
+            <div style="margin-top:20px;">
+                <button id="btnApplyTheme" onclick="applyTheme()">적용</button>
+                <button id="btnClose" onclick="closeModal(dom.themeModalContainer)">닫기</button>
+                <button id="btnResetTheme" onclick="resetTheme()">초기화</button>
             </div>
         </div>
     </div>
@@ -75,6 +100,7 @@
         // 도우미
         const gid = (id) => document.getElementById(id);
         const tag = (n) => document.createElement(n);
+        const setRoot = (variable, value) => document.documentElement.style.setProperty(variable, value);
 
         // 주요 돔 관리
         const dom = {
@@ -83,11 +109,14 @@
             searchText: gid("searchText"),
             pagination: gid("pagination"),
 
-            btnRes: gid("btnRes"),
             insertModalContainer: gid("insertModalContainer"),
+            btnRes: gid("btnRes"),
 
-            btnUpdate: gid("btnUpdate"),
+            themeModalContainer: gid("themeModalContainer"),
+            btnApplyTheme: gid("btnApplyTheme"),
+
             editModalContainer: gid("editModalContainer"),
+            btnUpdate: gid("btnUpdate"),
             editOldCategory: gid("editOldCategory"),
             editOldTitle: gid("editOldTitle"),
             editCategory: gid("editCategory"),
@@ -95,23 +124,44 @@
             editLink: gid("editLink")
         }
 
-        // 데이터 불러오기
-        function loadData() {
-            dom.tableBody.innerHTML = "<tr><td colspan='4'>로딩 중...</td></tr>";
-            dom.category.innerHTML = '<option value="모두">모두</option>';
-            categoryList = ["모두"];
+        // 테마 변수
+        const themes = [
+            '--bg-color',
+            '--container-bg',
+            '--input-bg',
+            '--text-color',
+            '--accent-color',
+            '--accent-text-color',
+            '--agree-color',
+            '--agree-text-color',
+            '--disagree-color',
+            '--disagree-text-color',
+            '--reset-color',
+            '--reset-text-color'
+        ];
 
-            fetch(API_URL)
-            .then(res => res.json())
-            .then(data => {
-                dom.tableBody.innerHTML = "";
-                data.forEach(item => {
-                    updateCategoryList(item.분류);
-                    addRow(item.분류, item.제목, item.등록일, item.링크);
-                });
-                allRows = Array.from(dom.tableBody.querySelectorAll("tr"));
-                searchData();
+        // 테마 적용
+        function applyTheme() {
+            themes.forEach(t => {
+                const picker = gid(t);
+                if (picker) {
+                    setRoot(t, picker.value);
+                    localStorage.setItem(t, picker.value);
+                }
+            });     
+            closeModal(dom.themeModalContainer);
+        }
+
+        // 테마 초기화
+        function resetTheme() {
+            if (!confirm("테마를 기본 설정으로 초기화하시겠습니까?")) return;
+
+            themes.forEach(t => {
+                localStorage.removeItem(t);
+                document.documentElement.style.removeProperty(t);
             });
+            
+            location.reload();
         }
 
         // 카테고리 목록 업데이트
@@ -213,6 +263,17 @@
             openModal(dom.insertModalContainer);
         }
 
+        // 테마 모달 제어 
+        function openThemeModal() {
+            themes.forEach(t => {
+                const currentColor = getComputedStyle(document.documentElement).getPropertyValue(t).trim();
+                if (gid(t) && currentColor) {
+                    gid(t).value = currentColor;
+                }
+            });
+            openModal(dom.themeModalContainer);
+        }
+
         // 정보 수정 모달 제어
         function openEditModal(category, title, link) {
             dom.editOldCategory.value = category;
@@ -252,15 +313,49 @@
             .catch(() => { alert("오류 발생"); dom.btnUpdate.disabled = false; });
         }
 
-        window.onload = loadData;
-        window.onclick = (event) => {
-            if (event.target.classList.contains('modal-container')) {
-                closeModal(event.target);
-            }
+        // 테마 불러오기
+        function loadTheme() {
+            themes.forEach(t => {
+                const saved = localStorage.getItem(t);
+                if (saved) {
+                    setRoot(t, saved);
+                    const picker = gid(t);
+                    if (picker) picker.value = saved;
+                }
+            });
         }
+
+        // 데이터 불러오기
+        function loadData() {
+            dom.tableBody.innerHTML = "<tr><td colspan='4'>로딩 중...</td></tr>";
+            dom.category.innerHTML = '<option value="모두">모두</option>';
+            categoryList = ["모두"];
+
+            fetch(API_URL)
+            .then(res => res.json())
+            .then(data => {
+                dom.tableBody.innerHTML = "";
+                data.forEach(item => {
+                    updateCategoryList(item.분류);
+                    addRow(item.분류, item.제목, item.등록일, item.링크);
+                });
+                allRows = Array.from(dom.tableBody.querySelectorAll("tr"));
+                searchData();
+            });
+        }
+
+        window.onload = () => {
+            loadData();
+            loadTheme();
+        }
+        // window.onclick = (event) => {
+        //     if (event.target.classList.contains('modal-container')) {
+        //         closeModal(event.target);
+        //     }
+        // }
         dom.category.onchange = searchData;
         dom.searchText.onkeypress = (e) => { if(e.key === "Enter") searchData(); };
-
+        // css 수정 모달과 브라우저 로컬에 저장해서 기록 
     </script>
 </body>
 </html>

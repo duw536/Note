@@ -1,142 +1,180 @@
 :root {
-  --bg-color: #363636;
-  --container-bg: #2b2c31;
-  --text-color: #efefef;
-  --border-color: #4a4a4a;
-  --header-bg: #444444;
-  --input-bg: #222222;
-  --accent-color: #6fb98f;
-  --modal-overlay: rgba(0, 0, 0, 0.7);
+	--bg-color: #363636;
+	--container-bg: #2b2c31;
+	--text-color: #efefef;
+	--border-color: #4a4a4a;
+	--header-bg: #444444;
+	--input-bg: #222222;
+	--accent-color: #6fb98f;
+    --accent-text-color: white;
+    --agree-color: #6fb98f;
+    --agree-text-color: white;
+    --disagree-color: #c0392b;
+    --disagree-text-color: white;
+    --reset-color:  #f39c12;
+    --reset-text-color: white;
+	--modal-overlay: rgba(0, 0, 0, 0.7);
 }
 
 body {
-  background-color: var(--bg-color);
-  color: var(--text-color);
-  font-family: sans-serif;
-  margin: 0;
+	background-color: var(--bg-color);
+	color: var(--text-color);
+	font-family: sans-serif;
+	margin: 0;
 }
 
-#btnIns {
-  margin: 20px;
-  padding: 10px 20px;
-  background-color: var(--accent-color);
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-weight: bold;
+#btnIns, #btnTme {
+	margin: 20px;
+    margin-right: 5px;
+	padding: 10px 20px;
+	background-color: var(--accent-color);
+	color: var(--accent-text-color);
+	border: none;
+	border-radius: 5px;
+	cursor: pointer;
+	font-weight: bold;
+}
+
+#btnSearch {
+	padding: 5px 20px;
+	background-color: var(--accent-color);
+	color: var(--accent-text-color);
+	border: none;
+	border-radius: 5px;
+	cursor: pointer;
+	font-weight: bold;
 }
 
 .container {
-  padding: 20px;
-  max-width: 1000px;
-  margin: 20px auto;
-  background-color: var(--container-bg);
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+	padding: 20px;
+	max-width: 1000px;
+	margin: 20px auto;
+	background-color: var(--container-bg);
+	border-radius: 12px;
+	box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
 input[type="text"],
 select {
-  background-color: var(--input-bg);
-  color: var(--text-color);
-  border: 1px solid var(--border-color);
-  padding: 10px;
-  border-radius: 6px;
-  outline: none;
+	background-color: var(--input-bg);
+	color: var(--text-color);
+	border: 1px solid var(--border-color);
+	padding: 10px;
+	border-radius: 6px;
+	outline: none;
 }
 
 /* 모달 공통 스타일 */
 .modal-container {
-  display: none;
-  width: 100%;
-  height: 100%;
-  background-color: var(--modal-overlay);
-  z-index: 1000;
-  position: fixed;
-  top: 0;
-  left: 0;
+	display: none;
+	width: 100%;
+	height: 100%;
+	background-color: var(--modal-overlay);
+	z-index: 1000;
+	position: fixed;
+	top: 0;
+	left: 0;
 }
 
 .modal-content {
-  background-color: var(--container-bg);
-  color: var(--text-color);
-  width: 320px;
-  margin: 100px auto;
-  padding: 25px;
-  text-align: center;
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-  border: 1px solid var(--border-color);
+	background-color: var(--container-bg);
+	color: var(--text-color);
+	width: 320px;
+	margin: 100px auto;
+	padding: 25px;
+	text-align: center;
+	border-radius: 12px;
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+	border: 1px solid var(--border-color);
 }
 
 .modal-content input {
-  width: 80%;
-  margin-bottom: 10px;
+	width: 80%;
+	margin-bottom: 10px;
 }
 
-#btnRes, #btnUpdate {
-  background-color: var(--accent-color); 
-  color:white; border:none; 
-  padding:8px 20px; 
-  border-radius:4px; 
-  cursor:pointer;
+#btnRes, #btnUpdate, #btnApplyTheme {
+	background-color: var(--agree-color); 
+	color: var(--agree-text-color);
+	border: none; 
+	padding: 8px 20px; 
+	border-radius: 4px; 
+	cursor: pointer;
+}
+
+#btnClose {
+    background-color: var(--disagree-color);
+	color: var(--disagree-text-color);
+	border: none; 
+	padding: 8px 20px; 
+	border-radius: 4px; 
+	cursor: pointer;
+}
+
+#btnResetTheme {
+    background-color: var(--reset-color);
+    color: var(--reset-text-color);
+    border: none; 
+    padding: 8px 20px; 
+    border-radius: 4px; 
+    cursor: pointer;
+    margin-left: 50px;
 }
 
 /* 테이블 스타일 */
 table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 15px;
-  background-color: #efefef;
-  border-radius: 8px;
-  overflow: hidden;
+	width: 100%;
+	border-collapse: collapse;
+	margin-top: 15px;
+	background-color: #efefef;
+	border-radius: 8px;
+	overflow: hidden;
 }
 
 th {
-  background-color: #767676;
-  color: #ffffff;
-  padding: 12px;
+	background-color: #767676;
+	color: #ffffff;
+	padding: 12px;
 }
 
 td {
-  border: 1px solid #cccccc;
-  padding: 10px;
-  color: #222222;
-  text-align: center;
+	border: 1px solid #cccccc;
+	padding: 10px;
+	color: #222222;
+	text-align: center;
 }
 
 .td-title {
-  cursor: pointer;
-  transition: color 0.2s;
+	cursor: pointer;
+	transition: color 0.2s;
 }
 
 .td-title:hover {
-  color: var(--accent-color);
-  text-decoration: underline;
+	color: var(--accent-color);
+	text-decoration: underline;
 }
 
 .td-category {
-  cursor: help;
+	cursor: help;
 }
 
 /* 페이지네이션 */
 .pagination {
-  margin-top: 25px;
-  text-align: center;
+	margin-top: 25px;
+	text-align: center;
 }
 
 .pagination button {
-  background-color: var(--container-bg);
-  border: 1px solid var(--border-color);
-  color: var(--text-color);
-  padding: 6px 12px;
-  margin: 0 3px;
-  cursor: pointer;
-  border-radius: 4px;
+	background-color: var(--container-bg);
+	border: 1px solid var(--border-color);
+	color: var(--text-color);
+	padding: 6px 12px;
+	margin: 0 3px;
+	cursor: pointer;
+	border-radius: 4px;
 }
 
 .pagination button.active {
-  background-color: var(--accent-color);
-  color: white;
+	background-color: var(--accent-color);
+	color: var(--accent-text-color);
 }
