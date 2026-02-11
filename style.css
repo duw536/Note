@@ -6,13 +6,13 @@
 	--header-bg: #444444;
 	--input-bg: #222222;
 	--accent-color: #6fb98f;
-    --accent-text-color: white;
+    --accent-text-color: #efefef;
     --agree-color: #6fb98f;
-    --agree-text-color: white;
+    --agree-text-color: #efefef;
     --disagree-color: #c0392b;
-    --disagree-text-color: white;
+    --disagree-text-color: #efefef;
     --reset-color:  #f39c12;
-    --reset-text-color: white;
+    --reset-text-color: #efefef;
 	--modal-overlay: rgba(0, 0, 0, 0.7);
 }
 
