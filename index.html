@@ -348,14 +348,8 @@
             loadData();
             loadTheme();
         }
-        // window.onclick = (event) => {
-        //     if (event.target.classList.contains('modal-container')) {
-        //         closeModal(event.target);
-        //     }
-        // }
         dom.category.onchange = searchData;
         dom.searchText.onkeypress = (e) => { if(e.key === "Enter") searchData(); };
-        // css 수정 모달과 브라우저 로컬에 저장해서 기록 
     </script>
 </body>
 </html>
